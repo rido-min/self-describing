@@ -1,7 +1,7 @@
-﻿using Microsoft.Azure.Devices;
-using Microsoft.Azure.Devices.Serialization;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Azure.Devices;
+using Microsoft.Azure.Devices.Serialization;
 
 namespace service
 {
@@ -15,7 +15,7 @@ namespace service
             var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>("self");
             var mid = respt.Body.Metadata.ModelId;
 
-            if (mid == "dtmi:std:selfreporting;1")
+            if (mid.Contains("self-describing=true"))
             {
                 Console.WriteLine("Device is Self Reporting, querying for the model");
                 var resp = await dtc.InvokeCommandAsync("self", "GetModel");

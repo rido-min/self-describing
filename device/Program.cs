@@ -3,6 +3,7 @@ using Microsoft.Azure.Devices.Shared;
 using System;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace device
@@ -14,8 +15,11 @@ namespace device
 
         static async Task Main(string[] args)
         {
-            string modelIdSD = "dtmi:std:selfreporting;1";
-            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelIdSD });
+            var id = JsonDocument.Parse(model).RootElement.GetProperty("@id").GetString();
+            Uri u = new Uri($"{id}?self-describing=true");
+            string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
+
+            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelId });
 
             TwinCollection reported = new TwinCollection();
             reported["modelHash"] = common.Hash.GetHashString(model);
@@ -44,7 +48,5 @@ namespace device
                 await Task.Delay(400);
             }
         }
-
-      
     }
 }
