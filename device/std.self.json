@@ -1,0 +1,23 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:std:selfreporting;1",
+  "@type": "Interface",
+  "displayName": "IDispatch",
+  "contents": [
+    {
+      "@type": "Command",
+      "name": "GetModel"
+    },
+    {
+      "@type": "Property",
+      "name": "modelHash",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Telemetry",
+      "name": "modelChanged",
+      "schema": "boolean"
+    }
+  ]
+}
