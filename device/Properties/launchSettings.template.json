@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "device": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DEVICE_CS": "HostName=.azure-devices.net;DeviceId=self;SharedAccessKey="
+      }
+    }
+  }
+}

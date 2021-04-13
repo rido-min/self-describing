@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "HUB_CS": "HostName=.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey="
+      }
+    }
+  }
+}
