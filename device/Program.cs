@@ -11,11 +11,11 @@ namespace device
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
-        static string model = File.ReadAllText(@"..\..\..\deviceModel.json");
+        static string model = File.ReadAllText(@"..\..\..\deviceModel.expanded.json");
 
         static async Task Main(string[] args)
         {
-            var id = JsonDocument.Parse(model).RootElement.GetProperty("@id").GetString();
+            var id = JsonDocument.Parse(model).RootElement[0].GetProperty("@id").GetString();
             var hash = common.Hash.GetHashString(model);
             Uri u = new Uri($"{id}?resolution=self&hash={hash}");
             string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";

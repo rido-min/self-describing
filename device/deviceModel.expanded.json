@@ -1,0 +1,33 @@
+[
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:what:ever:random:id;1",
+    "@type": "Interface",
+    "extends": "dtmi:std:selfreporting;1",
+    "displayName": "My Device",
+    "contents": [
+      {
+        "@type": "Telemetry",
+        "name": "temp",
+        "schema": "double"
+      }
+    ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:std:selfreporting;1",
+    "@type": "Interface",
+    "displayName": "IDispatch",
+    "contents": [
+      {
+        "@type": "Command",
+        "name": "GetModel",
+        "response": {
+          "name": "GetModelResponse",
+          "schema": "string"
+        }
+      }
+    ]
+  }
+
+]
