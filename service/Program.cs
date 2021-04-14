@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Serialization;
 
@@ -13,15 +14,17 @@ namespace service
             var dtc = DigitalTwinClient.CreateFromConnectionString(cs);
 
             var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>("self");
-            var mid = respt.Body.Metadata.ModelId;
+            var mid = new Uri(respt.Body.Metadata.ModelId);
+            Console.WriteLine(mid.ToString());
+            var resolution = HttpUtility.ParseQueryString(mid.Query).Get("resolution");
 
-            if (mid.Contains("self-describing=true"))
+            if (resolution=="self")
             {
                 Console.WriteLine("Device is Self Reporting, querying for the model");
                 var resp = await dtc.InvokeCommandAsync("self", "GetModel");
                 var model = resp.Body.Payload;
                 string hash = common.Hash.GetHashString(model);
-                var expectedHash = respt.Body.CustomProperties["modelHash"];
+                var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
                 if (hash.Equals(expectedHash))
                 {
                     Console.WriteLine("Hash validation passed");

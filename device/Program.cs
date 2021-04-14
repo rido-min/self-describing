@@ -16,15 +16,12 @@ namespace device
         static async Task Main(string[] args)
         {
             var id = JsonDocument.Parse(model).RootElement.GetProperty("@id").GetString();
-            Uri u = new Uri($"{id}?self-describing=true");
+            var hash = common.Hash.GetHashString(model);
+            Uri u = new Uri($"{id}?resolution=self&hash={hash}");
             string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
 
             var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelId });
-
-            TwinCollection reported = new TwinCollection();
-            reported["modelHash"] = common.Hash.GetHashString(model);
-            await dc.UpdateReportedPropertiesAsync(reported);
-            Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
+            Console.WriteLine(modelId);
 
             await dc.SetMethodHandlerAsync("GetModel", (MethodRequest req, object ctx) =>
             {
