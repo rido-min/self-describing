@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Azure.IoT.ModelsRepository;
@@ -50,7 +51,6 @@ namespace service
                     Console.WriteLine("Querying device for the model");
                     var resp = await dtc.InvokeCommandAsync("self", "GetModel");
                     modelPayload = resp.Body.Payload;
-                    // TODO: check the reported model extends std
                     string hash = common.Hash.GetHashString(modelPayload);
                     if (hash.Equals(expectedHash))
                     {
@@ -63,7 +63,17 @@ namespace service
 
                     }
                 }
-                model = await modelParser.ParseAsync(new string[] {modelPayload });
+                model = await modelParser.ParseAsync(new string[] { modelPayload });
+                var rootId = GetRootId(modelPayload);
+                var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
+                if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
+                {
+                    Console.WriteLine("Extends Check OK");
+                } 
+                else
+                {
+                    throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
+                }
             }
             else
             {
@@ -74,5 +84,21 @@ namespace service
             return model;
         }
 
+        
+
+        static string GetRootId(string modelPayload)
+        {
+            var doc = JsonDocument.Parse(modelPayload).RootElement;
+            string id;
+            if (doc.ValueKind == JsonValueKind.Array)
+            {
+                id = JsonDocument.Parse(modelPayload).RootElement[0].GetProperty("@id").GetString();
+            }
+            else
+            {
+                id = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
+            }
+            return id;
+        }
     }
 }
