@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.Devices.Client;
-using Microsoft.Azure.Devices.Shared;
 using System;
 using System.IO;
 using System.Text;
@@ -10,8 +9,8 @@ namespace device
 {
     class Program
     {
-        static string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
-        static string model = File.ReadAllText(@"..\..\..\deviceModel.expanded.json");
+        static readonly string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
+        static readonly string model = File.ReadAllText(@"..\..\..\deviceModel.expanded.json");
 
         static async Task Main(string[] args)
         {

@@ -55,7 +55,6 @@ namespace service
                     if (hash.Equals(expectedHash))
                     {
                         Console.WriteLine("Hash validation passed");
-                        Console.WriteLine(string.Empty);
                         cache.Add(hash, resp.Body.Payload);
                     }
                     else

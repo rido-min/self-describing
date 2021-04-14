@@ -9,8 +9,8 @@ namespace common
         {
             static byte[] GetHash(string inputString)
             {
-                using (HashAlgorithm algorithm = SHA256.Create())
-                    return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+                using HashAlgorithm algorithm = SHA256.Create();
+                return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
             }
 
             StringBuilder sb = new StringBuilder();
