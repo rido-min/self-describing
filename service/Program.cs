@@ -50,6 +50,7 @@ namespace service
                     Console.WriteLine("Querying device for the model");
                     var resp = await dtc.InvokeCommandAsync("self", "GetModel");
                     modelPayload = resp.Body.Payload;
+                    // TODO: check the reported model extends std
                     string hash = common.Hash.GetHashString(modelPayload);
                     if (hash.Equals(expectedHash))
                     {
