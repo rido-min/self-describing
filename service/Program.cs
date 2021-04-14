@@ -34,9 +34,8 @@ namespace service
             ModelParser modelParser = new ModelParser();
             IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
 
-            var resolution = HttpUtility.ParseQueryString(mid.Query).Get("resolution");
 
-            if (!string.IsNullOrEmpty(resolution) && resolution == "self")
+            if (mid.AbsolutePath == "std:selfreporting;1")
             {
                 Console.WriteLine("Device is Self Reporting");
                 var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
@@ -68,7 +67,7 @@ namespace service
             else
             {
                 ModelsRepositoryClient dmrClient = new ModelsRepositoryClient();
-                var models = dmrClient.GetModels(mid.AbsoluteUri);
+                var models = dmrClient.GetModels(modelId);
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
             return model;

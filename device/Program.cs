@@ -14,9 +14,9 @@ namespace device
 
         static async Task Main(string[] args)
         {
-            var id = JsonDocument.Parse(model).RootElement[0].GetProperty("@id").GetString();
+            var id = "dtmi:std:selfreporting;1"; // JsonDocument.Parse(model).RootElement[0].GetProperty("@id").GetString();
             var hash = common.Hash.GetHashString(model);
-            Uri u = new Uri($"{id}?resolution=self&hash={hash}");
+            Uri u = new Uri($"{id}?hash={hash}");
             string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
 
             var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelId });
