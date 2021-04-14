@@ -14,13 +14,15 @@ namespace service
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
+
+        static IDictionary<string, string> cache = new Dictionary<string, string>();
+
         static async Task Main(string[] args)
         {
             var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>("self");
             Console.WriteLine(respt.Body.Metadata.ModelId);
 
             var model = await ResolveAndParse(respt.Body.Metadata.ModelId);
-            
             foreach (var item in model) Console.WriteLine($"{item.Key} - {item.Value}");
 
             Console.ReadLine();
@@ -36,22 +38,33 @@ namespace service
 
             if (!string.IsNullOrEmpty(resolution) && resolution == "self")
             {
-                Console.WriteLine("Device is Self Reporting, querying for the model");
-                var resp = await dtc.InvokeCommandAsync("self", "GetModel");
-                var modelPayload = resp.Body.Payload;
-                string hash = common.Hash.GetHashString(modelPayload);
+                Console.WriteLine("Device is Self Reporting");
                 var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
-                if (hash.Equals(expectedHash))
+                string modelPayload;
+                if (cache.ContainsKey(expectedHash))
                 {
-                    Console.WriteLine("Hash validation passed");
-                    Console.WriteLine(modelPayload);
+                    modelPayload = cache[expectedHash];
+                    Console.WriteLine("Model found in cache");
                 }
                 else
                 {
-                    throw new ApplicationException("Wrong Hash value");
+                    Console.WriteLine("Querying device for the model");
+                    var resp = await dtc.InvokeCommandAsync("self", "GetModel");
+                    modelPayload = resp.Body.Payload;
+                    string hash = common.Hash.GetHashString(modelPayload);
+                    if (hash.Equals(expectedHash))
+                    {
+                        Console.WriteLine("Hash validation passed");
+                        Console.WriteLine(string.Empty);
+                        cache.Add(hash, resp.Body.Payload);
+                    }
+                    else
+                    {
+                        throw new ApplicationException("Wrong Hash value");
 
+                    }
                 }
-                model = await modelParser.ParseAsync(new string[] { modelPayload });
+                model = await modelParser.ParseAsync(new string[] {modelPayload });
             }
             else
             {
@@ -61,5 +74,6 @@ namespace service
             }
             return model;
         }
+
     }
 }
