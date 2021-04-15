@@ -1,0 +1,15 @@
+[
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:com:example:antenna;1",
+    "@type": "Interface",
+    "displayName": "Sample Antenna",
+    "contents": [
+      {
+        "@type": "Telemetry",
+        "name": "tagRead",
+        "schema": "string"
+      }
+    ]
+  }
+]

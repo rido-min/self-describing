@@ -1,0 +1,24 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:what:ever:random:id;1",
+  "@type": "Interface",
+  "extends": "dtmi:std:selfreporting;1",
+  "displayName": "My Device",
+  "contents": [
+    {
+      "@type": "Telemetry",
+      "name": "temp",
+      "schema": "double"
+    },
+    {
+      "@type": "Component",
+      "name": "antenna1",
+      "schema": "dtmi:com:example:antenna;1"
+    },
+    {
+      "@type": "Component",
+      "name": "antenna2",
+      "schema": "dtmi:com:example:antenna;1"
+    }
+  ]
+}
