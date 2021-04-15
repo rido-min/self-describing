@@ -10,6 +10,16 @@
         "@type": "Telemetry",
         "name": "temp",
         "schema": "double"
+      },
+      {
+        "@type": "Component",
+        "name": "antenna1",
+        "schema": "dtmi:com:example:antenna;1"
+      },
+      {
+        "@type": "Component",
+        "name": "antenna2",
+        "schema": "dtmi:com:example:antenna;1"
       }
     ]
   },
@@ -28,6 +38,18 @@
         }
       }
     ]
+  },
+  {
+    "@context": "dtmi:dtdl:context;2",
+    "@id": "dtmi:com:example:antenna;1",
+    "@type": "Interface",
+    "displayName": "Sample Antenna",
+    "contents": [
+      {
+        "@type": "Telemetry",
+        "name": "tagRead",
+        "schema": "string"
+      }
+    ]
   }
-
 ]

@@ -9,6 +9,16 @@
       "@type": "Telemetry",
       "name": "temp",
       "schema": "double"
+    },
+    {
+      "@type": "Component",
+      "name": "antenna1",
+      "schema": "dtmi:com:example:antenna;1"
+    },
+    {
+      "@type": "Component",
+      "name": "antenna2",
+      "schema": "dtmi:com:example:antenna;1"
     }
   ]
 }
