@@ -10,7 +10,7 @@ namespace device
     class Program
     {
         static readonly string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
-        static readonly string model = File.ReadAllText(@"..\..\..\deviceModel.expanded.json");
+        static readonly string model = File.ReadAllText(@"..\..\..\model.json");
 
         static async Task Main(string[] args)
         {
@@ -28,7 +28,7 @@ namespace device
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(model), 200));
             }, null);
 
-            await SendEvents(dc);
+            //await SendEvents(dc);
 
             Console.ReadLine();
         }

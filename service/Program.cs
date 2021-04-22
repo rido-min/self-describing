@@ -11,11 +11,12 @@ using Microsoft.Azure.DigitalTwins.Parser;
 
 namespace service
 {
+
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-
+        static string repo = "https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing";
         static IDictionary<string, string> cache = new Dictionary<string, string>();
 
         static async Task Main(string[] args)
@@ -24,7 +25,7 @@ namespace service
             Console.WriteLine(respt.Body.Metadata.ModelId);
 
             var model = await ResolveAndParse(respt.Body.Metadata.ModelId);
-            foreach (var item in model) Console.WriteLine($"{item.Key} - {item.Value}");
+            model.ToList().ForEach(i => Console.WriteLine(i.Key));
 
             Console.ReadLine();
         }
@@ -32,9 +33,13 @@ namespace service
         private static async Task<IReadOnlyDictionary<Dtmi, DTEntityInfo>> ResolveAndParse(string modelId)
         {
             var mid = new Uri(modelId);
-            ModelParser modelParser = new ModelParser();
-            IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
+            ModelsRepositoryClient dmrClient = new ModelsRepositoryClient(new Uri(repo));
+            ModelParser modelParser = new ModelParser() 
+            {
+                DtmiResolver = dmrClient.ParserDtmiResolver
+            };
 
+            IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
 
             if (mid.AbsolutePath == "std:selfreporting;1")
             {
@@ -68,7 +73,7 @@ namespace service
                 var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
                 if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
                 {
-                    Console.WriteLine("Extends Check OK");
+                    Console.WriteLine("Extends Check OK\n");
                 } 
                 else
                 {
@@ -77,7 +82,6 @@ namespace service
             }
             else
             {
-                ModelsRepositoryClient dmrClient = new ModelsRepositoryClient();
                 var models = dmrClient.GetModels(modelId);
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
