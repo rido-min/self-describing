@@ -15,76 +15,61 @@ namespace service
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
-        static string deviceId = "self";
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-        static string repo = "https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing";
+        static string deviceId = "self";
 
         static async Task Main(string[] args)
         {
             var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>(deviceId);
-            Console.WriteLine($"Device announced: {respt.Body.Metadata.ModelId}\n");
+            Console.WriteLine($"Device '{deviceId}' announced: {respt.Body.Metadata.ModelId}\n");
 
-            var model = await ResolveAndParse(respt.Body.Metadata.ModelId);
+            var model = await ResolveAndParse(new Uri(respt.Body.Metadata.ModelId));
             model.ToList().ForEach(i => Console.WriteLine(i.Key));
 
             Console.ReadLine();
         }
 
-        private static async Task<IReadOnlyDictionary<Dtmi, DTEntityInfo>> ResolveAndParse(string modelId)
+        private static async Task<IReadOnlyDictionary<Dtmi, DTEntityInfo>> ResolveAndParse(Uri mid)
         {
-            var mid = new Uri(modelId);
+            IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
+        
+            string repo = "https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing";
             ModelsRepositoryClient dmrClient = new ModelsRepositoryClient(new Uri(repo));
             ModelParser modelParser = new ModelParser() 
             {
                 DtmiResolver = dmrClient.ParserDtmiResolver
             };
 
-            IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
-
             if (mid.AbsolutePath == "std:selfreporting;1")
             {
-                Console.WriteLine("Device is Self Reporting");
+                Console.WriteLine("Device is Self Reporting. Querying device for the model . . ");
 
-                Console.WriteLine("Querying device for the model");
                 var resp = await dtc.InvokeCommandAsync(deviceId, "GetModel");
                 string modelPayload = resp.Body.Payload;
+                Console.Write("Device::GetModel() ok..");
 
                 CheckHash(mid, modelPayload);
 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
 
                 CheckExtends(model, modelPayload);
+                Console.WriteLine("Self Describing protocol checks succeed\n");
             }
             else
             {
                 Console.WriteLine("Resolving from repo");
-                var models = dmrClient.GetModels(modelId);
+                var models = dmrClient.GetModels(mid.ToString());
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
             return model;
         }
-
-        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string modelPayload)
-        {
-            var rootId = GetRootId(modelPayload);
-            var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
-            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
-            {
-                Console.WriteLine("Extends Check OK\n");
-            }
-            else
-            {
-                throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
-            }
-        }
-
         private static void CheckHash(Uri mid, string modelPayload)
         {
             var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
             string hash = common.Hash.GetHashString(modelPayload);
             if (hash.Equals(expectedHash, StringComparison.InvariantCulture))
             {
-                Console.WriteLine("Hash validation passed");
+                Console.Write(" Hash check ok.. ");
             }
             else
             {
@@ -92,20 +77,18 @@ namespace service
             }
         }
 
-
-        static string GetRootId(string modelPayload)
+        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string modelPayload)
         {
-            var doc = JsonDocument.Parse(modelPayload).RootElement;
-            string id;
-            if (doc.ValueKind == JsonValueKind.Array)
+            var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
+            var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
+            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
             {
-                id = JsonDocument.Parse(modelPayload).RootElement[0].GetProperty("@id").GetString();
+                Console.Write(" Extends check ok.. ");
             }
             else
             {
-                id = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
+                throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
             }
-            return id;
         }
     }
 }
