@@ -15,14 +15,14 @@ namespace service
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
+        static string deviceId = "self";
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
         static string repo = "https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing";
-        static IDictionary<string, string> cache = new Dictionary<string, string>();
 
         static async Task Main(string[] args)
         {
-            var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>("self");
-            Console.WriteLine(respt.Body.Metadata.ModelId);
+            var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>(deviceId);
+            Console.WriteLine($"Device announced: {respt.Body.Metadata.ModelId}\n");
 
             var model = await ResolveAndParse(respt.Body.Metadata.ModelId);
             model.ToList().ForEach(i => Console.WriteLine(i.Key));
@@ -44,51 +44,54 @@ namespace service
             if (mid.AbsolutePath == "std:selfreporting;1")
             {
                 Console.WriteLine("Device is Self Reporting");
-                var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
-                string modelPayload;
-                if (cache.ContainsKey(expectedHash))
-                {
-                    modelPayload = cache[expectedHash];
-                    Console.WriteLine("Model found in cache");
-                }
-                else
-                {
-                    Console.WriteLine("Querying device for the model");
-                    var resp = await dtc.InvokeCommandAsync("self", "GetModel");
-                    modelPayload = resp.Body.Payload;
-                    string hash = common.Hash.GetHashString(modelPayload);
-                    if (hash.Equals(expectedHash))
-                    {
-                        Console.WriteLine("Hash validation passed");
-                        cache.Add(hash, resp.Body.Payload);
-                    }
-                    else
-                    {
-                        throw new ApplicationException("Wrong Hash value");
 
-                    }
-                }
+                Console.WriteLine("Querying device for the model");
+                var resp = await dtc.InvokeCommandAsync(deviceId, "GetModel");
+                string modelPayload = resp.Body.Payload;
+
+                CheckHash(mid, modelPayload);
+
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
-                var rootId = GetRootId(modelPayload);
-                var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
-                if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
-                {
-                    Console.WriteLine("Extends Check OK\n");
-                } 
-                else
-                {
-                    throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
-                }
+
+                CheckExtends(model, modelPayload);
             }
             else
             {
+                Console.WriteLine("Resolving from repo");
                 var models = dmrClient.GetModels(modelId);
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
             return model;
         }
 
-        
+        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string modelPayload)
+        {
+            var rootId = GetRootId(modelPayload);
+            var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
+            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
+            {
+                Console.WriteLine("Extends Check OK\n");
+            }
+            else
+            {
+                throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
+            }
+        }
+
+        private static void CheckHash(Uri mid, string modelPayload)
+        {
+            var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
+            string hash = common.Hash.GetHashString(modelPayload);
+            if (hash.Equals(expectedHash, StringComparison.InvariantCulture))
+            {
+                Console.WriteLine("Hash validation passed");
+            }
+            else
+            {
+                throw new ApplicationException("Wrong Hash value");
+            }
+        }
+
 
         static string GetRootId(string modelPayload)
         {
