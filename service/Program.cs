@@ -11,7 +11,6 @@ using Microsoft.Azure.DigitalTwins.Parser;
 
 namespace service
 {
-
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
@@ -52,7 +51,6 @@ namespace service
 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
 
-                CheckExtends(model, modelPayload);
                 Console.WriteLine("Self Describing protocol checks succeed\n");
             }
             else
@@ -74,20 +72,6 @@ namespace service
             else
             {
                 throw new ApplicationException("Wrong Hash value");
-            }
-        }
-
-        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string modelPayload)
-        {
-            var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
-            var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
-            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
-            {
-                Console.Write(" Extends check ok.. ");
-            }
-            else
-            {
-                throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
             }
         }
     }
