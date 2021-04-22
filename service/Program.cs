@@ -32,8 +32,7 @@ namespace service
         {
             IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
         
-            string repo = "https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing";
-            ModelsRepositoryClient dmrClient = new ModelsRepositoryClient(new Uri(repo));
+            ModelsRepositoryClient dmrClient = new ModelsRepositoryClient();
             ModelParser modelParser = new ModelParser() 
             {
                 DtmiResolver = dmrClient.ParserDtmiResolver
