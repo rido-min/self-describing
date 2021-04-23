@@ -62,7 +62,7 @@ namespace service
         }
         private static void CheckHash(Uri mid, string modelPayload)
         {
-            var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("hash");
+            var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("sha256");
             string hash = common.Hash.GetHashString(modelPayload);
             if (hash.Equals(expectedHash, StringComparison.InvariantCulture))
             {

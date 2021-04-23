@@ -16,7 +16,7 @@ namespace device
         {
             var id = "dtmi:std:selfreporting;1"; // JsonDocument.Parse(model).RootElement[0].GetProperty("@id").GetString();
             var hash = common.Hash.GetHashString(model);
-            Uri u = new Uri($"{id}?hash={hash}");
+            Uri u = new Uri($"{id}?sha256={hash}");
             string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
 
             var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelId });
