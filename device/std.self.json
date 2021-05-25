@@ -9,7 +9,7 @@
       "name": "GetModel",
       "response": {
         "name": "GetModelResponse",
-        "schema": "multiLineString"
+        "schema": "string"
       }
     },
     {
