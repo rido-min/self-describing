@@ -1,0 +1,33 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:std:selfreporting;1",
+  "@type": "Interface",
+  "displayName": "IDispatch",
+  "contents": [
+    {
+      "@type": "Command",
+      "name": "GetModel",
+      "response": {
+        "name": "GetModelResponse",
+        "schema": "multiLineString"
+      }
+    },
+    {
+      "@type": "Property",
+      "name": "ReportedModelHash",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Property",
+      "name": "ReportedModelId",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Telemetry",
+      "name": "ReportedModelChanged",
+      "schema": "boolean"
+    }
+  ]
+}
