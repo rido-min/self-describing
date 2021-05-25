@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace device
 {
+    enum ModelAnnouncement
+    {
+        DuringConnection,
+        UsingTwin,
+        None
+    }
+
     class Program
     {
         static string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
@@ -17,6 +24,8 @@ namespace device
             string modelIdSD = "dtmi:std:selfreporting;1";
             string reportedModelId = "dtmi:com:example:myDevice;1";
             string hash = common.Hash.GetHashString(model);
+
+            ModelAnnouncement modelAnnouncement = AskModelAnnouncement();
 
             Uri u = new Uri($"{modelIdSD}?SHA256={hash}&id={reportedModelId}");
             string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
@@ -41,6 +50,28 @@ namespace device
             await SendEvents(dc);
 
             Console.ReadLine();
+        }
+
+        private static ModelAnnouncement AskModelAnnouncement()
+        {
+            ModelAnnouncement modelAnnouncement = ModelAnnouncement.None;
+            Console.WriteLine("How this self describing device should announce its model?");
+            Console.WriteLine("1) AtConnection 2) Using Twins 3) None.");
+            var res = Console.ReadLine();
+            switch (res) 
+            {
+                case "1":
+                    modelAnnouncement = ModelAnnouncement.DuringConnection;
+                    break;
+                case "2":
+                    modelAnnouncement = ModelAnnouncement.UsingTwin;
+                    break;
+                case "3":
+                    modelAnnouncement = ModelAnnouncement.None;
+                    break;
+            }
+            Console.WriteLine("Using ModelAnnouncement=" + modelAnnouncement.ToString());
+            return modelAnnouncement;
         }
 
         private static async Task SendEvents(DeviceClient dc)

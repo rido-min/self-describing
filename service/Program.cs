@@ -23,13 +23,13 @@ namespace service
             var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>(deviceId);
             Console.WriteLine($"Device '{deviceId}' announced: {respt.Body.Metadata.ModelId}\n");
 
-            var model = await ResolveAndParse(new Uri(respt.Body.Metadata.ModelId));
+            var model = await ResolveAndParse(respt.Body);
             model.ToList().ForEach(i => Console.WriteLine(i.Key));
 
             Console.ReadLine();
         }
 
-        private static async Task<IReadOnlyDictionary<Dtmi, DTEntityInfo>> ResolveAndParse(Uri mid)
+        private static async Task<IReadOnlyDictionary<Dtmi, DTEntityInfo>> ResolveAndParse(BasicDigitalTwin twin)
         {
             IReadOnlyDictionary<Dtmi, DTEntityInfo> model;
 
@@ -40,6 +40,7 @@ namespace service
                 DtmiResolver = dmrClient.ParserDtmiResolver
             };
 
+            Uri mid = new Uri(twin.Metadata.ModelId);
             if (mid.AbsolutePath == "std:selfreporting;1")
             {
                 Console.WriteLine("Device is Self Reporting. Querying device for the model . . ");
@@ -48,12 +49,22 @@ namespace service
                 string modelPayload = resp.Body.Payload;
                 Console.Write("Device::GetModel() ok..");
 
-                CheckHash(mid, modelPayload);
+                string expectedHash = GetExpectedHash(twin);
+                string expectedId = GetExpectedId(twin);
 
+                if (!string.IsNullOrEmpty(expectedHash))
+                {
+                    CheckHash(expectedHash, modelPayload);
+                }
+                
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
 
-                CheckId(modelPayload, mid);
-                CheckExtends(model, mid);
+                if (!string.IsNullOrEmpty(expectedId))
+                {
+                    CheckId(modelPayload, expectedId);
+                    CheckExtends(model, expectedId);
+                }
+
                 Console.WriteLine("Self Describing protocol checks succeed\n");
             }
             else
@@ -64,9 +75,54 @@ namespace service
             }
             return model;
         }
-        private static void CheckHash(Uri mid, string modelPayload)
+
+        private static string GetExpectedHash(BasicDigitalTwin twin)
         {
-            var expectedHash = HttpUtility.ParseQueryString(mid.Query).Get("SHA256");
+            Uri mid = new Uri(twin.Metadata.ModelId);
+            var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get("SHA256"); 
+            if (!string.IsNullOrEmpty(hashFromQS))
+            {
+                return hashFromQS;
+            } else
+            {
+                var hashFromProp = twin.CustomProperties["ReportedModelHash"].ToString();
+                if (!string.IsNullOrEmpty(hashFromProp))
+                {
+                    return hashFromProp;
+                }
+                else
+                {
+                    Console.WriteLine("Hash not found");
+                    return null;
+                }
+            }
+        }
+
+        private static string GetExpectedId(BasicDigitalTwin twin)
+        {
+            Uri mid = new Uri(twin.Metadata.ModelId);
+            var idFromQS = HttpUtility.ParseQueryString(mid.Query).Get("id");
+            if (!string.IsNullOrEmpty(idFromQS))
+            {
+                return idFromQS;
+            }
+            else
+            {
+                var idFromProp = twin.CustomProperties["ReportedModelId"].ToString();
+                if (!string.IsNullOrEmpty(idFromProp))
+                {
+                    return idFromProp;
+                }
+                else
+                {
+                    Console.WriteLine("Hash not found");
+                    return null;
+                }
+            }
+        }
+
+        private static void CheckHash(string expectedHash, string modelPayload)
+        {
             string hash = common.Hash.GetHashString(modelPayload);
             if (hash.Equals(expectedHash, StringComparison.InvariantCulture))
             {
@@ -78,23 +134,22 @@ namespace service
             }
         }
 
-        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, Uri mid)
+        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string expectedId)
         {
-            var id = HttpUtility.ParseQueryString(mid.Query).Get("id");
-            var root = model.GetValueOrDefault(new Dtmi(id)) as DTInterfaceInfo;
+            
+            var root = model.GetValueOrDefault(new Dtmi(expectedId)) as DTInterfaceInfo;
             if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
             {
                 Console.Write(" Extends check ok.. ");
             }
             else
             {
-                throw new ApplicationException("Root Id does not extends std:selfreporting. " + id);
+                throw new ApplicationException("Root Id does not extends std:selfreporting. " + expectedId);
             }
         }
 
-        private static void CheckId(string modelPayload, Uri mid)
+        private static void CheckId(string modelPayload, string expectedId)
         {
-            var expectedId = HttpUtility.ParseQueryString(mid.Query).Get("id");
             var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
             if (expectedId == rootId)
             {
