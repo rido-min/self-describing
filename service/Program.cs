@@ -52,7 +52,8 @@ namespace service
 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
 
-                CheckExtends(model, modelPayload);
+                CheckId(modelPayload, mid);
+                CheckExtends(model, mid);
                 Console.WriteLine("Self Describing protocol checks succeed\n");
             }
             else
@@ -77,17 +78,31 @@ namespace service
             }
         }
 
-        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string modelPayload)
+        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, Uri mid)
         {
-            var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
-            var root = model.GetValueOrDefault(new Dtmi(rootId)) as DTInterfaceInfo;
+            var id = HttpUtility.ParseQueryString(mid.Query).Get("id");
+            var root = model.GetValueOrDefault(new Dtmi(id)) as DTInterfaceInfo;
             if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
             {
                 Console.Write(" Extends check ok.. ");
             }
             else
             {
-                throw new ApplicationException("Root Id does not extends std:selfreporting. " + rootId);
+                throw new ApplicationException("Root Id does not extends std:selfreporting. " + id);
+            }
+        }
+
+        private static void CheckId(string modelPayload, Uri mid)
+        {
+            var expectedId = HttpUtility.ParseQueryString(mid.Query).Get("id");
+            var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
+            if (expectedId == rootId)
+            {
+                Console.Write(" @Id checks ok ..");
+            }
+            else
+            {
+                throw new ApplicationException("Root Id does not match announced Id. " + rootId);
             }
         }
     }
