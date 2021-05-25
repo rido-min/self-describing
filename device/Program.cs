@@ -15,12 +15,22 @@ namespace device
         static async Task Main(string[] args)
         {
             string modelIdSD = "dtmi:std:selfreporting;1";
-            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, new ClientOptions { ModelId = modelIdSD });
+            string reportedModelId = "dtmi:com:example:myDevice;1";
+            string hash = common.Hash.GetHashString(model);
 
-            TwinCollection reported = new TwinCollection();
-            reported["modelHash"] = common.Hash.GetHashString(model);
-            await dc.UpdateReportedPropertiesAsync(reported);
-            Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
+            Uri u = new Uri($"{modelIdSD}?SHA256={hash}&id={reportedModelId}");
+            string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
+
+            //string modelId = modelIdSD;
+
+            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, 
+                new ClientOptions { ModelId = modelId });
+
+            //TwinCollection reported = new TwinCollection();
+            //reported["ReportedModelId"] = reportedModelId;
+            //reported["ReportedModelHash"] = hash;
+            //await dc.UpdateReportedPropertiesAsync(reported);
+            //Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
 
             await dc.SetMethodHandlerAsync("GetModel", (MethodRequest req, object ctx) =>
             {

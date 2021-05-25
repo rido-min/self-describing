@@ -6,17 +6,27 @@
   "contents": [
     {
       "@type": "Command",
-      "name": "GetModel"
+      "name": "GetModel",
+      "response": {
+        "name": "GetModelResponse",
+        "schema": "multiLineString"
+      }
     },
     {
       "@type": "Property",
-      "name": "modelHash",
+      "name": "ReportedModelHash",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Property",
+      "name": "ReportedModelId",
       "schema": "string",
       "writable": false
     },
     {
       "@type": "Telemetry",
-      "name": "modelChanged",
+      "name": "ReportedModelChanged",
       "schema": "boolean"
     }
   ]

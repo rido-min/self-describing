@@ -1,6 +1,6 @@
 {
   "@context": "dtmi:dtdl:context;2",
-  "@id": "dtmi:what:ever:random:id;1",
+  "@id": "dtmi:com:example:myDevice;1",
   "@type": "Interface",
   "extends": "dtmi:std:selfreporting;1",
   "displayName": "My Device",
@@ -9,6 +9,11 @@
       "@type": "Telemetry",
       "name": "temp",
       "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "SerialNumber",
+      "schema": "string"
     }
   ]
 }
