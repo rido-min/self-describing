@@ -27,19 +27,25 @@ namespace device
 
             ModelAnnouncement modelAnnouncement = AskModelAnnouncement();
 
-            Uri u = new Uri($"{modelIdSD}?SHA256={hash}&id={reportedModelId}");
-            string modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
+            string modelId = modelIdSD;
+            if (modelAnnouncement == ModelAnnouncement.DuringConnection)
+            {
+                Uri u = new Uri($"{modelIdSD}?SHA256={hash}&id={reportedModelId}");
+                modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
+                Console.WriteLine(modelId);
+            }
 
-            //string modelId = modelIdSD;
-
-            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt, 
+            var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt,
                 new ClientOptions { ModelId = modelId });
 
-            //TwinCollection reported = new TwinCollection();
-            //reported["ReportedModelId"] = reportedModelId;
-            //reported["ReportedModelHash"] = hash;
-            //await dc.UpdateReportedPropertiesAsync(reported);
-            //Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
+            if (modelAnnouncement == ModelAnnouncement.UsingTwin)
+            {
+                TwinCollection reported = new TwinCollection();
+                reported["ReportedModelId"] = reportedModelId;
+                reported["ReportedModelHash"] = hash;
+                await dc.UpdateReportedPropertiesAsync(reported);
+                Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
+            }
 
             await dc.SetMethodHandlerAsync("GetModel", (MethodRequest req, object ctx) =>
             {
@@ -54,22 +60,18 @@ namespace device
 
         private static ModelAnnouncement AskModelAnnouncement()
         {
-            ModelAnnouncement modelAnnouncement = ModelAnnouncement.None;
+
             Console.WriteLine("How this self describing device should announce its model?");
             Console.WriteLine("1) AtConnection 2) Using Twins 3) None.");
             var res = Console.ReadLine();
-            switch (res) 
+
+            ModelAnnouncement modelAnnouncement = res switch
             {
-                case "1":
-                    modelAnnouncement = ModelAnnouncement.DuringConnection;
-                    break;
-                case "2":
-                    modelAnnouncement = ModelAnnouncement.UsingTwin;
-                    break;
-                case "3":
-                    modelAnnouncement = ModelAnnouncement.None;
-                    break;
-            }
+                "1" => ModelAnnouncement.DuringConnection,
+                "2" => ModelAnnouncement.UsingTwin,
+                _ => ModelAnnouncement.None
+            };
+
             Console.WriteLine("Using ModelAnnouncement=" + modelAnnouncement.ToString());
             return modelAnnouncement;
         }
@@ -86,6 +88,6 @@ namespace device
             }
         }
 
-      
+
     }
 }

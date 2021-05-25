@@ -16,7 +16,7 @@ namespace service
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-        static string deviceId = "mySSDDevice";
+        static string deviceId = "mySSDDevice2";
 
         static async Task Main(string[] args)
         {
@@ -55,6 +55,7 @@ namespace service
                 if (!string.IsNullOrEmpty(expectedHash))
                 {
                     CheckHash(expectedHash, modelPayload);
+                    Console.WriteLine("Hash check succeed\n");
                 }
                 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
@@ -63,9 +64,9 @@ namespace service
                 {
                     CheckId(modelPayload, expectedId);
                     CheckExtends(model, expectedId);
+                    Console.WriteLine("Self Describing protocol checks succeed\n");
                 }
-
-                Console.WriteLine("Self Describing protocol checks succeed\n");
+                Console.WriteLine("\n Parsed Model \n");
             }
             else
             {
@@ -85,14 +86,14 @@ namespace service
                 return hashFromQS;
             } else
             {
-                var hashFromProp = twin.CustomProperties["ReportedModelHash"].ToString();
-                if (!string.IsNullOrEmpty(hashFromProp))
+                if (twin.CustomProperties.ContainsKey("ReportedModelHash"))
                 {
+                    var hashFromProp = twin.CustomProperties["ReportedModelHash"].ToString();
                     return hashFromProp;
                 }
                 else
                 {
-                    Console.WriteLine("Hash not found");
+                    Console.Write(".. Hash not found .. ");
                     return null;
                 }
             }
@@ -108,14 +109,14 @@ namespace service
             }
             else
             {
-                var idFromProp = twin.CustomProperties["ReportedModelId"].ToString();
-                if (!string.IsNullOrEmpty(idFromProp))
+                if (twin.CustomProperties.ContainsKey("ReportedModelId"))
                 {
+                    var idFromProp = twin.CustomProperties["ReportedModelId"].ToString();
                     return idFromProp;
                 }
                 else
                 {
-                    Console.WriteLine("Hash not found");
+                    Console.Write(" ... Id not found ...");
                     return null;
                 }
             }
