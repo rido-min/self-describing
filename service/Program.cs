@@ -124,7 +124,7 @@ namespace service
             }
             else
             {
-                throw new ApplicationException("Root Id does not extends std:selfreporting. " + expectedId);
+                throw new ApplicationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + expectedId);
             }
         }
 
