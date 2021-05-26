@@ -16,7 +16,7 @@ namespace service
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-        static string deviceId = "mySSDDevice2";
+        static string deviceId = "ssd01";
 
         static async Task Main(string[] args)
         {
@@ -41,16 +41,16 @@ namespace service
             };
 
             Uri mid = new Uri(twin.Metadata.ModelId);
-            if (mid.AbsolutePath == "std:selfreporting;1")
+            if (mid.AbsolutePath == "azure:common:SelfDescribing;1")
             {
                 Console.WriteLine("Device is Self Reporting. Querying device for the model . . ");
 
-                var resp = await dtc.InvokeCommandAsync(deviceId, "GetModel");
+                var resp = await dtc.InvokeCommandAsync(deviceId, "GetTargetModel");
                 string modelPayload = resp.Body.Payload;
-                Console.Write("Device::GetModel() ok..");
+                Console.Write("Device::GetTargetModel() ok..");
 
-                string expectedHash = GetExpectedHash(twin);
-                string expectedId = GetExpectedId(twin);
+                string expectedHash = GetPropFromModelOrTwin(twin, "tmhash", "TargetModelHash");
+                string expectedId = GetPropFromModelOrTwin(twin, "tmid", "TargetModelId");
 
                 if (!string.IsNullOrEmpty(expectedHash))
                 {
@@ -77,18 +77,20 @@ namespace service
             return model;
         }
 
-        private static string GetExpectedHash(BasicDigitalTwin twin)
+
+        private static string GetPropFromModelOrTwin(BasicDigitalTwin twin, string propName,string twinName)
         {
             Uri mid = new Uri(twin.Metadata.ModelId);
-            var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get("SHA256"); 
+            var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get(propName);
             if (!string.IsNullOrEmpty(hashFromQS))
             {
                 return hashFromQS;
-            } else
+            }
+            else
             {
-                if (twin.CustomProperties.ContainsKey("ReportedModelHash"))
+                if (twin.CustomProperties.ContainsKey(twinName))
                 {
-                    var hashFromProp = twin.CustomProperties["ReportedModelHash"].ToString();
+                    var hashFromProp = twin.CustomProperties[twinName].ToString();
                     return hashFromProp;
                 }
                 else
@@ -99,28 +101,6 @@ namespace service
             }
         }
 
-        private static string GetExpectedId(BasicDigitalTwin twin)
-        {
-            Uri mid = new Uri(twin.Metadata.ModelId);
-            var idFromQS = HttpUtility.ParseQueryString(mid.Query).Get("id");
-            if (!string.IsNullOrEmpty(idFromQS))
-            {
-                return idFromQS;
-            }
-            else
-            {
-                if (twin.CustomProperties.ContainsKey("ReportedModelId"))
-                {
-                    var idFromProp = twin.CustomProperties["ReportedModelId"].ToString();
-                    return idFromProp;
-                }
-                else
-                {
-                    Console.Write(" ... Id not found ...");
-                    return null;
-                }
-            }
-        }
 
         private static void CheckHash(string expectedHash, string modelPayload)
         {
@@ -139,7 +119,7 @@ namespace service
         {
             
             var root = model.GetValueOrDefault(new Dtmi(expectedId)) as DTInterfaceInfo;
-            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:std:selfreporting;1")
+            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:azure:common:SelfDescribing;1")
             {
                 Console.Write(" Extends check ok.. ");
             }

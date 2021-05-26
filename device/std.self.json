@@ -1,33 +1,28 @@
 {
   "@context": "dtmi:dtdl:context;2",
-  "@id": "dtmi:std:selfreporting;1",
+  "@id": "dtmi:azure:common:SelfDescribing;1",
   "@type": "Interface",
   "displayName": "IDispatch",
   "contents": [
     {
       "@type": "Command",
-      "name": "GetModel",
+      "name": "GetTargetModel",
       "response": {
-        "name": "GetModelResponse",
+        "name": "GetTargetModelResponse",
         "schema": "string"
       }
     },
     {
       "@type": "Property",
-      "name": "ReportedModelHash",
+      "name": "TargetModelHash",
       "schema": "string",
       "writable": false
     },
     {
       "@type": "Property",
-      "name": "ReportedModelId",
+      "name": "TargetModelId",
       "schema": "string",
       "writable": false
-    },
-    {
-      "@type": "Telemetry",
-      "name": "ReportedModelChanged",
-      "schema": "boolean"
     }
   ]
 }

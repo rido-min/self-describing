@@ -2,7 +2,7 @@
   "@context": "dtmi:dtdl:context;2",
   "@id": "dtmi:com:example:myDevice;1",
   "@type": "Interface",
-  "extends": "dtmi:std:selfreporting;1",
+  "extends": "dtmi:azure:common:SelfDescribing;1",
   "displayName": "My Device",
   "contents": [
     {
