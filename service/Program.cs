@@ -16,7 +16,7 @@ namespace service
     {
         static string cs = System.Environment.GetEnvironmentVariable("HUB_CS");
         static DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-        static string deviceId = "ssd01";
+        static string deviceId = "sdd2";
 
         static async Task Main(string[] args)
         {
@@ -24,6 +24,7 @@ namespace service
             Console.WriteLine($"Device '{deviceId}' announced: {respt.Body.Metadata.ModelId}\n");
 
             var model = await ResolveAndParse(respt.Body);
+            Console.WriteLine("\nModel Parsed !! \n\n");
             model.ToList().ForEach(i => Console.WriteLine(i.Key));
 
             Console.ReadLine();
@@ -49,24 +50,20 @@ namespace service
                 string modelPayload = resp.Body.Payload;
                 Console.Write("Device::GetTargetModel() ok..");
 
-                string expectedHash = GetPropFromModelOrTwin(twin, "tmhash", "TargetModelHash");
-                string expectedId = GetPropFromModelOrTwin(twin, "tmid", "TargetModelId");
-
-                if (!string.IsNullOrEmpty(expectedHash))
+                string targetModelHash = GetPropFromModelOrTwin(twin, "tmhash", "TargetModelHash");
+                if (!string.IsNullOrEmpty(targetModelHash))
                 {
-                    CheckHash(expectedHash, modelPayload);
-                    Console.WriteLine("Hash check succeed\n");
+                    CheckHash(targetModelHash, modelPayload);
+                }
+
+                string targetModelId  = GetPropFromModelOrTwin(twin, "tmid", "TargetModelId");
+                if (!string.IsNullOrEmpty(targetModelId))
+                {
+                    CheckId(targetModelId, modelPayload);
                 }
 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
-
-                if (!string.IsNullOrEmpty(expectedId))
-                {
-                    CheckId(modelPayload, expectedId);
-                    CheckExtends(model, expectedId);
-                    Console.WriteLine("Self Describing protocol checks succeed\n");
-                }
-                Console.WriteLine("\n Parsed Model \n");
+                CheckExtends(targetModelId, model);
             }
             else
             {
@@ -101,10 +98,10 @@ namespace service
             }
         }
 
-        private static void CheckHash(string expectedHash, string modelPayload)
+        private static void CheckHash(string targetModelHash, string modelPayload)
         {
             string hash = common.Hash.GetHashString(modelPayload);
-            if (hash.Equals(expectedHash, StringComparison.InvariantCulture))
+            if (hash.Equals(targetModelHash, StringComparison.InvariantCulture))
             {
                 Console.Write(" Hash check ok.. ");
             }
@@ -114,26 +111,26 @@ namespace service
             }
         }
 
-        private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string expectedId)
+        private static void CheckExtends(string targetModelId, IReadOnlyDictionary<Dtmi, DTEntityInfo> model)
         {
 
-            var root = model.GetValueOrDefault(new Dtmi(expectedId)) as DTInterfaceInfo;
+            var root = model.GetValueOrDefault(new Dtmi(targetModelId)) as DTInterfaceInfo;
             if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:azure:common:SelfDescribing;1")
             {
                 Console.Write(" Extends check ok.. ");
             }
             else
             {
-                throw new ApplicationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + expectedId);
+                throw new ApplicationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + targetModelId);
             }
         }
 
-        private static void CheckId(string modelPayload, string expectedId)
+        private static void CheckId(string targetModelId, string modelPayload)
         {
             var rootId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
-            if (expectedId == rootId)
+            if (targetModelId == rootId)
             {
-                Console.Write(" @Id checks ok ..");
+                Console.Write(" @Id checks ok.. ");
             }
             else
             {

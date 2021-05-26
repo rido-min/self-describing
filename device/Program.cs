@@ -10,20 +10,20 @@ namespace device
 {
     class Program
     {
-        static bool sendModelAtConnection = true;
+        static bool sendModelAtConnection = false;
         static string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
         static string model = File.ReadAllText(@"..\..\..\deviceModel.json");
 
         static async Task Main(string[] args)
         {
-            string modelIdSD = "dtmi:azure:common:SelfDescribing;1";
-            string reportedModelId = "dtmi:com:example:myDevice;1";
-            string hash = common.Hash.GetHashString(model);
+            string selfDescribingDtmi = "dtmi:azure:common:SelfDescribing;1";
+            string targetModelId = "dtmi:com:example:myDevice;1";
+            string targetModelhash = common.Hash.GetHashString(model);
 
-            string modelId = modelIdSD;
+            string modelId = selfDescribingDtmi;
             if (sendModelAtConnection)
             {
-                Uri u = new Uri($"{modelIdSD}?tmhash={hash}&tmid={reportedModelId}");
+                Uri u = new Uri($"{selfDescribingDtmi}?tmhash={targetModelhash}&tmid={targetModelId}");
                 modelId = $"{u.Scheme}:{u.AbsolutePath}{Uri.EscapeDataString(u.Query)}";
                 Console.WriteLine(modelId);
             }
@@ -33,8 +33,8 @@ namespace device
 
             
             TwinCollection reported = new TwinCollection();
-            reported["TargetModelId"] = reportedModelId;
-            reported["TargetModelHash"] = hash;
+            reported["TargetModelId"] = targetModelId;
+            reported["TargetModelHash"] = targetModelhash;
             await dc.UpdateReportedPropertiesAsync(reported);
             
             Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
