@@ -57,7 +57,7 @@ namespace service
                     CheckHash(expectedHash, modelPayload);
                     Console.WriteLine("Hash check succeed\n");
                 }
-                
+
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
 
                 if (!string.IsNullOrEmpty(expectedId))
@@ -78,20 +78,20 @@ namespace service
         }
 
 
-        private static string GetPropFromModelOrTwin(BasicDigitalTwin twin, string propName,string twinName)
+        private static string GetPropFromModelOrTwin(BasicDigitalTwin twin, string propName, string twinName)
         {
-            Uri mid = new Uri(twin.Metadata.ModelId);
-            var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get(propName);
-            if (!string.IsNullOrEmpty(hashFromQS))
+            if (twin.CustomProperties.ContainsKey(twinName))
             {
-                return hashFromQS;
+                var hashFromProp = twin.CustomProperties[twinName].ToString();
+                return hashFromProp;
             }
             else
             {
-                if (twin.CustomProperties.ContainsKey(twinName))
+                Uri mid = new Uri(twin.Metadata.ModelId);
+                var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get(propName);
+                if (!string.IsNullOrEmpty(hashFromQS))
                 {
-                    var hashFromProp = twin.CustomProperties[twinName].ToString();
-                    return hashFromProp;
+                    return hashFromQS;
                 }
                 else
                 {
@@ -100,7 +100,6 @@ namespace service
                 }
             }
         }
-
 
         private static void CheckHash(string expectedHash, string modelPayload)
         {
@@ -117,7 +116,7 @@ namespace service
 
         private static void CheckExtends(IReadOnlyDictionary<Dtmi, DTEntityInfo> model, string expectedId)
         {
-            
+
             var root = model.GetValueOrDefault(new Dtmi(expectedId)) as DTInterfaceInfo;
             if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:azure:common:SelfDescribing;1")
             {
