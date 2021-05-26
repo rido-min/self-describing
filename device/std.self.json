@@ -14,13 +14,13 @@
     },
     {
       "@type": "Property",
-      "name": "TargetModelHash",
+      "name": "targetModelHash",
       "schema": "string",
       "writable": false
     },
     {
       "@type": "Property",
-      "name": "TargetModelId",
+      "name": "targetModelId",
       "schema": "string",
       "writable": false
     }

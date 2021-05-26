@@ -50,13 +50,13 @@ namespace service
                 string modelPayload = resp.Body.Payload;
                 Console.Write("Device::GetTargetModel() ok..");
 
-                string targetModelHash = GetPropFromModelOrTwin(twin, "tmhash", "TargetModelHash");
+                string targetModelHash = GetPropFromModelOrTwin(twin, "tmhash", "targetModelHash");
                 if (!string.IsNullOrEmpty(targetModelHash))
                 {
                     CheckHash(targetModelHash, modelPayload);
                 }
 
-                string targetModelId  = GetPropFromModelOrTwin(twin, "tmid", "TargetModelId");
+                string targetModelId  = GetPropFromModelOrTwin(twin, "tmid", "targetModelId");
                 if (!string.IsNullOrEmpty(targetModelId))
                 {
                     CheckId(targetModelId, modelPayload);

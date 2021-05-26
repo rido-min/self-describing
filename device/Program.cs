@@ -33,8 +33,8 @@ namespace device
 
             
             TwinCollection reported = new TwinCollection();
-            reported["TargetModelId"] = targetModelId;
-            reported["TargetModelHash"] = targetModelhash;
+            reported["targetModelId"] = targetModelId;
+            reported["targetModelHash"] = targetModelhash;
             await dc.UpdateReportedPropertiesAsync(reported);
             
             Console.WriteLine(reported.ToJson(Newtonsoft.Json.Formatting.Indented));
