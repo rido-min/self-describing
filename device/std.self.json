@@ -1,0 +1,28 @@
+{
+  "@context": "dtmi:dtdl:context;2",
+  "@id": "dtmi:azure:common:SelfDescribing;1",
+  "@type": "Interface",
+  "displayName": "IDispatch",
+  "contents": [
+    {
+      "@type": "Command",
+      "name": "GetTargetModel",
+      "response": {
+        "name": "GetTargetModelResponse",
+        "schema": "string"
+      }
+    },
+    {
+      "@type": "Property",
+      "name": "targetModelHash",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Property",
+      "name": "targetModelId",
+      "schema": "string",
+      "writable": false
+    }
+  ]
+}
