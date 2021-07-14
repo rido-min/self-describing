@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 
 namespace common
 {
@@ -14,7 +15,7 @@ namespace common
             }
 
             StringBuilder sb = new StringBuilder();
-            foreach (byte b in GetHash(inputString)) sb.Append(b.ToString("X2"));
+            GetHash(inputString).ToList().ForEach(b => sb.Append(b.ToString("X2")));
             return sb.ToString();
         }
     }

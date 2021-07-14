@@ -20,10 +20,10 @@ namespace service
 
         static async Task Main(string[] args)
         {
-            var respt = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>(deviceId);
-            Console.WriteLine($"Device '{deviceId}' announced: {respt.Body.Metadata.ModelId}\n");
+            var twinResponse = await dtc.GetDigitalTwinAsync<BasicDigitalTwin>(deviceId);
+            Console.WriteLine($"Device '{deviceId}' announced: {twinResponse.Body.Metadata.ModelId}\n");
 
-            var model = await ResolveAndParse(respt.Body);
+            var model = await ResolveAndParse(twinResponse.Body);
             Console.WriteLine("\nModel Parsed !! \n\n");
             model.ToList().ForEach(i => Console.WriteLine(i.Key));
 
@@ -41,13 +41,13 @@ namespace service
                 DtmiResolver = dmrClient.ParserDtmiResolver
             };
 
-            Uri mid = new Uri(twin.Metadata.ModelId);
-            if (mid.AbsolutePath == "azure:common:SelfDescribing;1")
+            Uri modelId = new Uri(twin.Metadata.ModelId);
+            if (modelId.AbsolutePath == "azure:common:SelfDescribing;1")
             {
                 Console.WriteLine("Device is Self Reporting. Querying device for the model . . ");
 
-                var resp = await dtc.InvokeCommandAsync(deviceId, "GetTargetModel");
-                string modelPayload = resp.Body.Payload;
+                var commandResponse = await dtc.InvokeCommandAsync(deviceId, "GetTargetModel");
+                string modelPayload = commandResponse.Body.Payload;
                 Console.Write("Device::GetTargetModel() ok..");
 
                 string targetModelHash = GetPropFromModelOrTwin(twin, "tmhash", "targetModelHash");
@@ -68,7 +68,7 @@ namespace service
             else
             {
                 Console.WriteLine("Resolving from repo");
-                var models = dmrClient.GetModels(mid.ToString());
+                var models = dmrClient.GetModels(modelId.ToString());
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
             return model;
@@ -107,7 +107,7 @@ namespace service
             }
             else
             {
-                throw new ApplicationException("Wrong Hash value");
+                throw new InvalidOperationException("Wrong Hash value");
             }
         }
 
@@ -121,7 +121,7 @@ namespace service
             }
             else
             {
-                throw new ApplicationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + targetModelId);
+                throw new InvalidOperationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + targetModelId);
             }
         }
 

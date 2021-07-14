@@ -3,7 +3,7 @@
     "device": {
       "commandName": "Project",
       "environmentVariables": {
-        "DEVICE_CS": "HostName=.azure-devices.net;DeviceId=self;SharedAccessKey="
+        "DEVICE_CS": "HostName=ridohub2.azure-devices.net;DeviceId=sdd;SharedAccessKey=sMp5erMdJOeE8tDUUKZm1l/78uQUVMe9/wwUWMxxtbc="
       }
     }
   }
