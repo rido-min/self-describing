@@ -52,21 +52,22 @@ namespace service
                 string discoveredModelId = JsonDocument.Parse(modelPayload).RootElement.GetProperty("@id").GetString();
                 Console.Write("Discovered ModelId: " + discoveredModelId);
 
-                string targetModelHash = GetPropFromModelOrTwin(twin, "tmhash", "targetModelHash");
+                string targetModelHash = SelfDescribingChecks.GetPropFromModelOrTwin(twin, "tmhash", "targetModelHash");
                 if (!string.IsNullOrEmpty(targetModelHash))
                 {
-                    CheckHash(targetModelHash, modelPayload);
+
+                    SelfDescribingChecks.CheckHash(targetModelHash, modelPayload);
                 }
 
-                string targetModelId = GetPropFromModelOrTwin(twin, "tmid", "targetModelId");
+                string targetModelId = SelfDescribingChecks.GetPropFromModelOrTwin(twin, "tmid", "targetModelId");
                 if (!string.IsNullOrEmpty(targetModelId))
                 {
-                    CheckId(targetModelId, discoveredModelId);
+                    SelfDescribingChecks.CheckId(targetModelId, discoveredModelId);
                 }
 
 
                 model = await modelParser.ParseAsync(new string[] { modelPayload });
-                CheckExtends(discoveredModelId, model);
+                SelfDescribingChecks.CheckExtends(discoveredModelId, model);
             }
             else
             {
@@ -75,68 +76,6 @@ namespace service
                 model = await modelParser.ParseAsync(models.Values.ToArray());
             }
             return model;
-        }
-
-
-        private static string GetPropFromModelOrTwin(BasicDigitalTwin twin, string propName, string twinName)
-        {
-            if (twin.CustomProperties.ContainsKey(twinName))
-            {
-                var hashFromProp = twin.CustomProperties[twinName].ToString();
-                return hashFromProp;
-            }
-            else
-            {
-                Uri mid = new Uri(twin.Metadata.ModelId);
-                var hashFromQS = HttpUtility.ParseQueryString(mid.Query).Get(propName);
-                if (!string.IsNullOrEmpty(hashFromQS))
-                {
-                    return hashFromQS;
-                }
-                else
-                {
-                    Console.Write(".. Hash not found .. ");
-                    return null;
-                }
-            }
-        }
-
-        private static void CheckHash(string targetModelHash, string modelPayload)
-        {
-            string hash = common.Hash.GetHashString(modelPayload);
-            if (hash.Equals(targetModelHash, StringComparison.InvariantCulture))
-            {
-                Console.Write(" Hash check ok.. ");
-            }
-            else
-            {
-                throw new InvalidOperationException("Wrong Hash value");
-            }
-        }
-
-        private static void CheckExtends(string targetModelId, IReadOnlyDictionary<Dtmi, DTEntityInfo> model)
-        {
-            var root = model.GetValueOrDefault(new Dtmi(targetModelId)) as DTInterfaceInfo;
-            if (root.Extends.Count > 0 && root.Extends[0].Id.AbsoluteUri == "dtmi:azure:common:SelfDescribing;1")
-            {
-                Console.Write(" Extends check ok.. ");
-            }
-            else
-            {
-                throw new InvalidOperationException("Root Id does not extends 'dtmi:azure:common:SelfDescribing;1'. " + targetModelId);
-            }
-        }
-
-        private static void CheckId(string targetModelId, string rootId)
-        {
-            if (targetModelId == rootId)
-            {
-                Console.Write(" @Id checks ok.. ");
-            }
-            else
-            {
-                throw new InvalidOperationException("Root Id does not match announced Id. " + rootId);
-            }
         }
     }
 }
