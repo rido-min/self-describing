@@ -7,7 +7,7 @@
   "contents": [
     {
       "@type": "Telemetry",
-      "name": "temp",
+      "name": "temperature",
       "schema": "double"
     },
     {

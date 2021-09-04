@@ -13,7 +13,7 @@ namespace device
         static bool sendModelAtConnection = true;
         static bool sendModelAsProperties = true;
         static string cs = System.Environment.GetEnvironmentVariable("DEVICE_CS");
-        static string model = File.ReadAllText(@"..\..\..\deviceModel.json");
+        static string model = File.ReadAllText(@"./deviceModel.json");
 
         static async Task Main(string[] args)
         {

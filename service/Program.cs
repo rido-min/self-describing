@@ -16,7 +16,7 @@ namespace service
     {
         static readonly string cs = Environment.GetEnvironmentVariable("HUB_CS");
         static readonly DigitalTwinClient dtc = DigitalTwinClient.CreateFromConnectionString(cs);
-        static readonly string deviceId = "self2";
+        static readonly string deviceId = "sdd";
 
         static async Task Main(string[] args)
         {
