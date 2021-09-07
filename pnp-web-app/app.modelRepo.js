@@ -1,36 +1,22 @@
 'use strict'
 
-const fs = require('fs')
-const glob = require('glob')
+const { ModelsRepositoryClient } = require('@azure/iot-modelsrepository')
+const hub = require('./app.iothub.js')
 
-// const npmorg = '@digital-twins/'
-const dir = './dtdl_models/' // + npmorg
-
-let models = []
-
-const loadModelsFromFS = () => {
-  models = []
-  return new Promise((resolve, reject) => {
-    glob(dir + '/**/package.json', (err, files) => {
-      if (err) reject(err)
-      files.forEach(f => {
-        const pjson = JSON.parse(fs.readFileSync(f, 'utf-8'))
-        pjson.models.forEach(m => {
-          const dtdlModel = JSON.parse(fs.readFileSync(f.replace('package.json', m), 'utf-8'))
-          models.push({ id: dtdlModel['@id'], version: pjson.version, pkg: f, dtdlModel })
-        })
-      })
-      resolve(models)
-    })
-  })
-}
-
-const getModel = async (id) => {
-  await loadModelsFromFS()
-  const m = models.find(e => e.id.toLowerCase() === id.toLowerCase())
-  if (m) {
-    return m.dtdlModel
+const getModel = async (connectionString, id, deviceId) => {
+  const url = new URL(id)
+  let model
+  if (url.pathname === 'azure:common:SelfDescribing;1') {
+    console.log('Device is Self Reporting. Querying device for the model . . ')
+    const cmdResponse = await hub.invokeDeviceMethod(connectionString, deviceId, 'GetTargetModel')
+    model = cmdResponse.payload
+  } else {
+    const client = new ModelsRepositoryClient()
+    const result = await client.getModels(url.protocol + url.pathname)
+    if (result) {
+      model = result[id]
+    }
   }
+  return model
 }
-
-module.exports = { loadModelsFromFS, getModel }
+module.exports = { getModel }

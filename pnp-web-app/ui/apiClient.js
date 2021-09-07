@@ -16,9 +16,9 @@ const getModelId = (deviceId) => {
   })
 }
 
-const getModel = (modelId) => {
+const getModel = (modelId, deviceId) => {
   return new Promise((resolve, reject) => {
-    window.fetch(`/api/getModel?modelId=${modelId}`)
+    window.fetch(`/api/getModel?modelId=${modelId}&deviceId=${deviceId}`)
       .then(resp => resp.json())
       .then(m => resolve(m))
       .catch(err => reject(err))

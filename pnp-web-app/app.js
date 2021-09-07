@@ -70,7 +70,7 @@ router.get('/getModelId', async (req, res) => {
 })
 
 router.get('/getModel', async (req, res) => {
-  const result = await repo.getModel(req.query.modelId)
+  const result = await repo.getModel(connectionString, req.query.modelId, req.query.deviceId)
   if (result) {
     return res.json(result)
   } else {

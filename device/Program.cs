@@ -47,6 +47,7 @@ namespace device
 
             await dc.SetMethodHandlerAsync("GetTargetModel", (MethodRequest req, object ctx) =>
             {
+                model = File.ReadAllText(@"./deviceModel.json");
                 Console.WriteLine("GetModel called");
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(model), 200));
             }, null);

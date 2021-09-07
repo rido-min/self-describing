@@ -7,13 +7,21 @@
   "contents": [
     {
       "@type": "Telemetry",
-      "name": "temperature",
+      "name": "temp",
       "schema": "double"
     },
     {
       "@type": "Property",
       "name": "SerialNumber",
       "schema": "string"
+    },
+    {
+      "@type": "Command",
+      "name": "reboot",
+      "request": {
+        "name": "delay",
+        "schema": "string"
+      }
     }
   ]
 }

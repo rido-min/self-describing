@@ -65,7 +65,8 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
     return
   }
 
-  const modelJson = await apiClient.getModel(modelId)
+  const modelJson = await apiClient.getModel(modelId, deviceId)
+  console.log(modelJson)
   if (!modelJson) {
     document.getElementById('errorMsg').innerHTML = `Model not found for ModelID ${modelId}`
     return
