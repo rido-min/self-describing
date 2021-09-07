@@ -45,7 +45,8 @@
                 window.fetch(`/api/getModelId?deviceId=${d.id}`)
                   .then(resp => resp.json())
                   .then(m => {
-                    d.modelId = m
+                    const u = new URL(m)
+                    d.modelId = u.protocol + u.pathname
                   })
               })
               this.devices = devicesDto

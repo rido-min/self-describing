@@ -4,3 +4,4 @@ obj/
 launchSettings.json
 node_modules/
 .env
+*.user

@@ -100,8 +100,8 @@ server.listen(port, () => console.log(`IoT Express app listening on port ${port}
 
 ;(async () => {
   await eventHubReader.startReadMessage((message, date, deviceId) => {
-    // console.log(deviceId)
-    // console.log(message.properties.reported.$metadata)
+     console.log(deviceId)
+     console.log(message)
     const payload = {
       IotData: message,
       MessageDate: date || Date.now().toISOString(),

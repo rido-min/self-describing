@@ -9,4 +9,10 @@
     <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.37.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="deviceModel.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
