@@ -100,14 +100,14 @@ server.listen(port, () => console.log(`IoT Express app listening on port ${port}
 
 ;(async () => {
   await eventHubReader.startReadMessage((message, date, deviceId) => {
-     console.log(deviceId)
-     console.log(message)
+     // console.log(deviceId)
+     // console.log(message)
     const payload = {
       IotData: message,
       MessageDate: date || Date.now().toISOString(),
       DeviceId: deviceId
     }
-    // console.log(message)
+    console.log(payload)
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(payload))

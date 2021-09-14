@@ -33,6 +33,8 @@ namespace device
             var dc = DeviceClient.CreateFromConnectionString(cs, TransportType.Mqtt,
                 new ClientOptions { ModelId = modelId });
 
+            //var dc = await DpsX509Client.SetupDeviceClientAsync("0ne003861C6", modelId, new System.Threading.CancellationToken());
+
             Console.WriteLine("Device Client connected: " + cs);
 
             if (sendModelAsProperties)
@@ -60,13 +62,13 @@ namespace device
         private static async Task SendEvents(DeviceClient dc)
         {
             Console.Write("Sending events ");
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
-                var message = new Message(Encoding.UTF8.GetBytes("{temp: " + i + "}"));
+                var message = new Message(Encoding.UTF8.GetBytes("{ \"temp\": " + i + "}"));
                 message.ContentType = "application/json";
                 message.ContentEncoding = "utf-8";
                 await dc.SendEventAsync(message);
-                await Task.Delay(400);
+                await Task.Delay(1000);
                 Console.Write('.');
             }
         }
