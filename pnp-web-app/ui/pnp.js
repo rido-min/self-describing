@@ -16,7 +16,8 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
         telemetryProps: [],
         reportedProps: [],
         desiredProps: [],
-        commands: []
+        commands: [],
+        cndResponse: {}
       },
       methods: {
         parseModel: async function (modelJson) {
@@ -42,7 +43,12 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
           }
 
           console.log(cmdName + cmdPayload)
-          await apiClient.invokeCommand(this.deviceId, cmdName, cmdPayload)
+          const resp = await apiClient.invokeCommand(this.deviceId, cmdName, cmdPayload)
+          this.cmdResponse = resp
+          const responseEl = document.getElementById(cmdName + '-response')
+          //Vue.set(this.cmdResponse, 'payload', responseEl.value)
+          responseEl.innerText = JSON.stringify(resp.payload, null, 2)
+
         },
         updateDesiredProp: async function (propName) {
           const el = document.getElementById(propName)

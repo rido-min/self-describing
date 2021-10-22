@@ -52,6 +52,7 @@
           <div>{{ cmd.request.name}}</div>
           <input type="text" v-bind:id="cmd.name + '-payload'" v-bind:placeholder="cmd.request.schema" />
           <button v-on:click="runCommand(cmd.name)">{{ cmd.name }}</button>
+          <pre v-bind:id="cmd.name + '-response'"></pre>
         </div>
       </div>
     </div>
