@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using System.Linq;
 
 namespace common
 {
@@ -14,7 +14,7 @@ namespace common
                 return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             GetHash(inputString).ToList().ForEach(b => sb.Append(b.ToString("X2")));
             return sb.ToString();
         }
