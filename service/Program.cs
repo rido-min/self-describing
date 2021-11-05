@@ -72,8 +72,8 @@ namespace service
             else
             {
                 Console.WriteLine("Resolving from repo");
-                var models = dmrClient.GetModels(modelId.ToString());
-                model = await modelParser.ParseAsync(models.Values.ToArray());
+                var models = dmrClient.GetModel(modelId.ToString());
+                model = await modelParser.ParseAsync(models.Content.Values.ToArray());
             }
             return model;
         }

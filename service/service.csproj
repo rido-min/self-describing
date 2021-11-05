@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.IoT.ModelsRepository" Version="1.0.0-preview.3" />
+    <PackageReference Include="Azure.IoT.ModelsRepository" Version="1.0.0-preview.5" />
     <PackageReference Include="Microsoft.Azure.Devices" Version="1.35.0" />
     <PackageReference Include="Microsoft.Azure.DigitalTwins.Parser" Version="3.12.7" />
   </ItemGroup>

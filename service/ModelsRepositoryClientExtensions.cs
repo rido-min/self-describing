@@ -1,9 +1,7 @@
 ﻿using Azure.IoT.ModelsRepository;
 using Microsoft.Azure.DigitalTwins.Parser;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace service
@@ -13,8 +11,13 @@ namespace service
         public static async Task<IEnumerable<string>> ParserDtmiResolver(this ModelsRepositoryClient client, IReadOnlyCollection<Dtmi> dtmis)
         {
             IEnumerable<string> dtmiStrings = dtmis.Select(s => s.AbsoluteUri);
-            IDictionary<string, string> result = await client.GetModelsAsync(dtmiStrings);
-            return result.Values.ToList();
+            List<string> modelDefinitions = new List<string>();
+            foreach (var dtmi in dtmiStrings)
+            {
+                ModelResult result = await client.GetModelAsync(dtmi);
+                modelDefinitions.Add(result.Content[dtmi]);
+            }
+            return modelDefinitions;
         }
     }
 }

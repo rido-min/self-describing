@@ -37,11 +37,17 @@ namespace device
                 Console.WriteLine("Update Twin with Std, v: " + v);
             }
 
-            client.OnCommandReceived += async (o, e) =>
+            client.OnCommand = e =>
             {
                 model = File.ReadAllText(@"./deviceModel.json");
                 Console.WriteLine("GetModel called");
-                await client.CommandResponseAsync(e.Rid, e.CommandName, "200", model);
+                //await client.CommandResponseAsync(e.Rid, e.CommandName, "200", model);
+                return  new CommandResponse()
+                {
+                    CommandName = e.CommandName,
+                    CommandResponsePayload = model,
+                    _status = 200
+                };
             };
 
             await SendEvents(client);
