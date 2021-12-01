@@ -21,7 +21,7 @@ body {
 
 .tile {
   padding: 10px;
-  width: min-content;
+  width: 300px;
   background-color: cornflowerblue;
   color: white;
   text-align: right;
@@ -29,13 +29,12 @@ body {
 }
 
 .tile-container {
-  padding: 5px;
+  padding: 3px;
   display: flex;
-
 }
 
 .tile-num-big {
-  font-size: 46px;
+  font-size: 24px;
 }
 
 .tile-name {

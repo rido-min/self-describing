@@ -11,7 +11,7 @@ const getModel = async (connectionString, id, deviceId) => {
     const cmdResponse = await hub.invokeDeviceMethod(connectionString, deviceId, 'GetTargetModel')
     model = cmdResponse.payload
   } else {
-    const client = new ModelsRepositoryClient({repositoryLocation:'https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/selfdescribing'})
+    const client = new ModelsRepositoryClient({repositoryLocation:'https://raw.githubusercontent.com/iotmodels/iot-plugandplay-models/rido/pnp'})
     const result = await client.getModels(url.protocol + url.pathname)
     if (result) {
       model = result[id]

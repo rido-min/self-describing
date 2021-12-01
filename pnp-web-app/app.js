@@ -107,7 +107,7 @@ server.listen(port, () => console.log(`IoT Express app listening on port ${port}
       MessageDate: date || Date.now().toISOString(),
       DeviceId: deviceId
     }
-    console.log(payload)
+    //console.log(payload)
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(payload))

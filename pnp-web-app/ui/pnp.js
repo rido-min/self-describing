@@ -42,7 +42,12 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
             cmdPayload = parseInt(cmdPayload, 10)
           }
 
-          console.log(cmdName + cmdPayload)
+          if (cmd.request.schema['@type'] === 'Enum')
+          {
+            cmdPayload = parseInt(cmdPayload, 10)
+          }
+
+          console.log(cmdName,cmdPayload)
           const resp = await apiClient.invokeCommand(this.deviceId, cmdName, cmdPayload)
           this.cmdResponse = resp
           const responseEl = document.getElementById(cmdName + '-response')
@@ -72,7 +77,7 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
   }
 
   const modelJson = await apiClient.getModel(modelId, deviceId)
-  console.log(modelJson)
+  //console.log(modelJson)
   if (!modelJson) {
     document.getElementById('errorMsg').innerHTML = `Model not found for ModelID ${modelId}`
     return
@@ -91,9 +96,21 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
       twin.properties &&
       twin.properties.reported &&
       twin.properties.reported[p.name]) {
-      const updated = moment(twin.properties.reported.$metadata[p.name].$lastUpdated).fromNow()
-      Vue.set(p, 'reportedValue', twin.properties.reported[p.name].value || twin.properties.reported[p.name])
-      Vue.set(p, 'lastUpdated', updated)
+        
+        if (p.schema === 'dateTime') {
+          var dateValue = new Date(twin.properties.reported[p.name].value || twin.properties.reported[p.name])
+          Vue.set(p, 'reportedValue', dateValue.toLocaleString())
+        } else {
+          Vue.set(p, 'reportedValue', twin.properties.reported[p.name].value || twin.properties.reported[p.name])
+        }
+        
+        if (twin.properties.reported[p.name].av) {
+          Vue.set(p, 'lastAV', twin.properties.reported[p.name].av)
+        }
+
+        
+        const updated = moment(twin.properties.reported.$metadata[p.name].$lastUpdated).fromNow()
+        Vue.set(p, 'lastUpdated', updated)
     }
   })
 

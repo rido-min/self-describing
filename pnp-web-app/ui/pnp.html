@@ -25,11 +25,12 @@
 
       <div v-for="repProp in reportedProps" class="tile-container">
         <div class="tile">
+          <div class="tile-name">{{ repProp.name }}</div>
           <div class="tile-num-big">
             {{ repProp.reportedValue }}
           </div>
-          <div class="tile-name">{{ repProp.name }}</div>
           <div class="tile-caption">last updated: {{ repProp.lastUpdated }}</div>
+          <div class="tile-caption" v-if="repProp.lastAV!=null">av: {{ repProp.lastAV }}</div>
         </div>
       </div>
 
