@@ -15,9 +15,11 @@
 <body>
   <div id="errorMsg"></div>
   <div id="app" class="container" v-cloak>
-    <h1>{{ deviceId }}</h1>
-    <span>{{ modelId }}</span>
-
+    <h1>{{ deviceId }} - {{ modelId }}</h1>
+    <div>
+        [<a :href="'/api/getDeviceTwin?deviceId=' + deviceId" target="_blank">deviceTwin</a>]
+        [<a :href="'/api/getDigitalTwin?deviceId=' + deviceId" target="_blank">digitalTwin</a>]
+    </div>
     <div v-if="reportedProps.length>0">
       <h4>Reported Properties
         <i>version: {{ reportedProps.version }}</i>

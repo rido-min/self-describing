@@ -17,7 +17,7 @@
     "@azure/event-hubs": "^5.2.2",
     "@azure/iot-modelsrepository": "^1.0.0-beta.2",
     "azure-iot-digitaltwins-service": "^1.0.0-pnp-refresh.3",
-    "azure-iothub": "^1.12.4",
+    "azure-iothub": "^1.14.6",
     "body-parser": "^1.19.0",
     "buffer": "^5.5.0",
     "crypto": "^1.0.1",

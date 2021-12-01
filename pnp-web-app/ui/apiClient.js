@@ -1,4 +1,4 @@
-const getDeviceTwin = (deviceId) => {
+const getDeviceTwin = deviceId => {
   return new Promise((resolve, reject) => {
     window.fetch(`/api/getDeviceTwin?deviceId=${deviceId}`)
       .then(resp => resp.json())

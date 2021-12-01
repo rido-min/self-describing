@@ -56,6 +56,13 @@ const getDeviceTwin = async (connectionString, deviceId) => {
   return twin
 }
 
+const getDigitalTwin = async (connectionString, deviceId) => {
+  const creds = new hub.IoTHubTokenCredentials(connectionString)
+  const dtc = new hub.DigitalTwinClient(creds)
+  const twin = await dtc.getDigitalTwin(deviceId)
+  return twin
+}
+
 const updateDeviceTwin = async (connectionString, deviceId, propertyName, propertyValue) => {
   const registry = hub.Registry.fromConnectionString(connectionString)
   const twin = await registry.getTwin(deviceId)
@@ -71,4 +78,4 @@ const invokeDeviceMethod = async (connectionString, deviceId, commandName, comma
   return result.result
 }
 
-module.exports = { getDeviceList, getDeviceTwin, updateDeviceTwin, invokeDeviceMethod, getModelId }
+module.exports = { getDeviceList, getDeviceTwin, updateDeviceTwin, invokeDeviceMethod, getModelId, getDigitalTwin }

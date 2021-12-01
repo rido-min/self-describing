@@ -64,6 +64,12 @@ router.get('/getDeviceTwin', async (req, res) => {
   res.json(result.responseBody)
 })
 
+router.get('/getDigitalTwin', async (req, res) => {
+  const result = await hub.getDigitalTwin(connectionString, req.query.deviceId)
+  console.log(result)
+  res.json(JSON.parse(result._response.bodyAsText))
+})
+
 router.get('/getModelId', async (req, res) => {
   const result = await hub.getModelId(connectionString, req.query.deviceId)
   res.json(result)
