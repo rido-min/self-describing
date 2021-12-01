@@ -83,34 +83,41 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
     return
   }
 
+  const showReportedProp = async p => {
+    twin = await apiClient.getDeviceTwin(deviceId)
+    if (p.schema === 'dateTime') {
+      var dateValue = new Date(twin.properties.reported[p.name].value || twin.properties.reported[p.name])
+      Vue.set(p, 'reportedValue', dateValue.toLocaleString())
+    } else {
+      Vue.set(p, 'reportedValue', twin.properties.reported[p.name].value || twin.properties.reported[p.name])
+    }
+    
+    if (twin.properties.reported[p.name].av) {
+      Vue.set(p, 'lastAV', twin.properties.reported[p.name].av)
+    }
+
+    if (twin.properties.reported[p.name].ac) {
+      Vue.set(p, 'lastAC', twin.properties.reported[p.name].ac)
+    }
+    const updated = moment(twin.properties.reported.$metadata[p.name].$lastUpdated).fromNow()
+    Vue.set(p, 'lastUpdated', updated)
+  }
+
+
   const app = createVueApp()
   app.deviceId = deviceId
   app.modelId = modelId
   await app.parseModel(modelJson)
 
-  const twin = await apiClient.getDeviceTwin(deviceId)
+  let twin = await apiClient.getDeviceTwin(deviceId)
   // reported props
   Vue.set(app.reportedProps, 'version', twin.properties.reported.$version)
-  app.reportedProps.forEach(p => {
+  app.reportedProps.forEach(async p => {
     if (twin &&
       twin.properties &&
       twin.properties.reported &&
       twin.properties.reported[p.name]) {
-        
-        if (p.schema === 'dateTime') {
-          var dateValue = new Date(twin.properties.reported[p.name].value || twin.properties.reported[p.name])
-          Vue.set(p, 'reportedValue', dateValue.toLocaleString())
-        } else {
-          Vue.set(p, 'reportedValue', twin.properties.reported[p.name].value || twin.properties.reported[p.name])
-        }
-        
-        if (twin.properties.reported[p.name].av) {
-          Vue.set(p, 'lastAV', twin.properties.reported[p.name].av)
-        }
-
-        
-        const updated = moment(twin.properties.reported.$metadata[p.name].$lastUpdated).fromNow()
-        Vue.set(p, 'lastUpdated', updated)
+        await showReportedProp(p)
     }
   })
 
@@ -132,20 +139,21 @@ const deviceId = new URLSearchParams(window.location.search).get('deviceId')
     }
   })
 
-  const updateReported = (reported) => {
+  const updateReported = reported => {
     Vue.set(app.reportedProps, 'version', reported.$version)
     for (const p in reported) {
       if (!p.startsWith('$')) {
         const prop = app.reportedProps.filter(x => x.name === p)[0]
         if (prop) {
-          Vue.set(prop, 'reportedValue', reported[p].value || reported[p])
-          Vue.set(prop, 'lastUpdated', moment(reported.$metadata[p].$lastUpdated).fromNow())
+          // Vue.set(prop, 'reportedValue', reported[p].value || reported[p])
+          // Vue.set(prop, 'lastUpdated', moment(reported.$metadata[p].$lastUpdated).fromNow())
+          showReportedProp(prop)
         }
       }
     }
   }
 
-  const updateDesired = (desired) => {
+  const updateDesired = desired => {
     Vue.set(app.desiredProps, 'version', desired.$version)
     for (const p in desired) {
       if (!p.startsWith('$')) {
